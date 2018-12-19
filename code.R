@@ -152,11 +152,13 @@ data4 <- data4[,N:=NULL]
 
 index <-lapply(1:1000,FUN =  function(a){sample(1:1299,400)})
 library(rpart)
-
-results4 <- lapply(1:100,FUN = function(i){
-  a <- rpart(good~.,data = data4[-index[[i]],],control = rpart.control(minsplit = 5))  
+data4 = data4[,good:=as.factor(good)]
+data3 = data3[,good:=as.factor(good)]
+results4 <- lapply(1:1000,FUN = function(i){
+  a <- rpart(good~.,data = data4[-index[[i]],])  
   b <- predict(a,data4[index[[i]],])
-  (ifelse(b>0.5,1,0)[,2]-as.numeric(data4[index[[i]],good])) %>% abs() %>% sum()
+  A <- table(ifelse(b>0.5,1,0)[,2],data4[index[[i]],]$good) 
+  A[1,2]+A[2,1]
 }) 
 results4 %>% unlist() %>% mean()
 
@@ -164,9 +166,12 @@ library(rpart)
 results3 <- lapply(1:1000,FUN = function(i){
   a <- rpart(good~.,data = data3[-index[[i]],])  
   b <- predict(a,data3[index[[i]],])
-  (ifelse(b>0.5,1,0)-data3[index[[i]],good]) %>% abs() %>% sum()
+  A <- table(ifelse(b>0.5,1,0)[,2],data3[index[[i]],]$good) 
+  A[1,2]+A[2,1]
+  
 }) 
 results3 %>% unlist() %>% mean()
+
 
 results1 %>% unlist() %>% hist
 results2 %>% unlist() %>% hist
